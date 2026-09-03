@@ -1,9 +1,9 @@
 name: TPS Rebuild CI
 on:
   push:
-    paths: ['rebuild/**']
+    paths: ['rebuild/**', '.github/workflows/tps-rebuild-ci.yml']
   pull_request:
-    paths: ['rebuild/**']
+    paths: ['rebuild/**', '.github/workflows/tps-rebuild-ci.yml']
 jobs:
   shell:
     runs-on: ubuntu-22.04
