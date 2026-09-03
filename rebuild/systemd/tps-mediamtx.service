@@ -1,0 +1,25 @@
+[Unit]
+Description=TPS Media Fabric - MediaMTX Cleanroom
+Documentation=https://mediamtx.org/docs/
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=tpsmedia
+Group=tpsmedia
+WorkingDirectory=/var/lib/tpsmedia/mediamtx
+ExecStart=/usr/bin/env -i HOME=/var/lib/tpsmedia/mediamtx USER=tpsmedia LOGNAME=tpsmedia PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin /opt/tpsmedia/mediamtx/current/mediamtx /etc/tpsmedia/mediamtx/mediamtx.yml
+Restart=on-failure
+RestartSec=2s
+TimeoutStopSec=15s
+KillSignal=SIGINT
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+ReadWritePaths=/var/lib/tpsmedia/mediamtx
+LimitNOFILE=1048576
+
+[Install]
+WantedBy=multi-user.target
