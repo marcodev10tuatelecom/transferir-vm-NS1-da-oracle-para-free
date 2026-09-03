@@ -161,31 +161,60 @@ Logo essa tentativa **não terminou a instância**.
 
 O procedimento futuro deve distinguir o estado do Work Request (`SUCCEEDED`) do lifecycle state da instância (`TERMINATED`) e verificar ambos separadamente.
 
-## 11. Estado de segurança no fim desta conversa arquivada
+## 11. Gate final de pré-terminação — resultado de 2026-09-03
 
-No último estado comprovado antes do pedido de arquivamento:
+O script `TPS-OCI-NS1-FINAL-PRETERMINATION-GATE-v1.0.0.sh` foi executado e confirmou:
 
-- NS1 A2 ainda não havia sido comprovadamente terminada.
-- Boot NS1 continuava existente, 99 GB, Free Tier retained.
-- Attachment era observado como `ATTACHED`.
-- NS2 não tinha sido alterado.
-- IP reservado `147.15.108.150` estava disponível e não associado.
-- A1 quota continuava livre (2 OCPU / 12 GB antes de qualquer lançamento A1).
+```text
+INSTANCE.state = STOPPED
+INSTANCE.shape = VM.Standard.A2.Flex
+BOOT_ATTACHMENT.state = ATTACHED
+BOOT_VOLUME.state = AVAILABLE
+BOOT_VOLUME.size = 99
+BOOT_VOLUME.free = true
+RESERVED_IP = 147.15.108.150
+RESERVED_IP.lifetime = RESERVED
+RESERVED_IP.state = AVAILABLE
+RESERVED_IP.assigned = null
+A1_CORE.used = 0
+A1_CORE.available = 2
+A1_MEMORY.used = 0
+A1_MEMORY.available = 12
+```
 
-## 12. Próxima ação preparada
+O relatório oficial de capacidade física da OCI para `VM.Standard.A1.Flex` com **2 OCPU / 12 GB** retornou:
 
-Foi criado `TPS-OCI-NS1-FINAL-PRETERMINATION-GATE-v1.0.0.sh` para revalidar:
+```text
+availability-status = OUT_OF_HOST_CAPACITY
+available-count = null
+fault-domain = null
+```
 
-- lifecycle real da instância;
-- estado real do attachment após o `Ctrl+C` e o erro `IncorrectState`;
-- integridade/free-tier do boot;
-- estado do reserved IP;
-- quota A1;
-- relatório de capacidade física A1 2 OCPU / 12 GB.
+### Decisão obrigatória
 
-A decisão planejada era só construir o cutover destrutivo `terminate --preserve-boot-volume true -> launch A1` depois desse gate.
+**NÃO TERMINAR `tuatelecom01` enquanto o capacity report continuar `OUT_OF_HOST_CAPACITY`.**
 
-## 13. Princípios adotados
+A quota Free existe, mas atualmente não há capacidade física A1 confirmada no AD para recriar NS1. Terminar a A2 agora liberaria seu IP efêmero antigo e deixaria apenas o boot preservado, sem garantia de conseguir lançar a A1 imediatamente.
+
+A documentação da Oracle define `OUT_OF_HOST_CAPACITY` como indisponibilidade de capacidade física da shape e recomenda aguardar e tentar novamente (ou usar outro AD, quando aplicável).
+
+## 12. Estado de segurança atual
+
+- NS1 A2: `STOPPED`, não terminada.
+- Boot NS1: 99 GB, existente e `free-tier-retained=true`.
+- Attachment NS1: `ATTACHED`.
+- NS2: não alterado.
+- IP reservado novo: `147.15.108.150`, `AVAILABLE`, não associado.
+- Quota A1: 2 OCPU / 12 GB livres.
+- Capacidade física A1 2/12: **OUT_OF_HOST_CAPACITY**.
+
+## 13. Próxima ação correta
+
+Repetir apenas o capacity report até o resultado mudar para `AVAILABLE`. Também é útil testar separadamente a capacidade para **1 OCPU / 6 GB**, porque pode haver capacidade para uma configuração menor mesmo quando 2/12 não está disponível.
+
+Nenhum `terminate`, `detach`, `launch` ou alteração de DNS deve ocorrer antes dessa decisão.
+
+## 14. Princípios adotados
 
 - Free-only: não converter a conta para paga como atalho.
 - Não apagar boot volumes.
@@ -194,3 +223,4 @@ A decisão planejada era só construir o cutover destrutivo `terminate --preserv
 - NS1 primeiro; NS2 somente depois de NS1 certificado.
 - Preservar evidências de todas as tentativas falhas.
 - Não tratar mensagem contraditória da OCI como sucesso.
+- Não destruir a A2 enquanto a capacidade física A1 não estiver comprovadamente disponível.
