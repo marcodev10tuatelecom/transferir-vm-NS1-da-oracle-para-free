@@ -1,0 +1,11 @@
+*.key
+*.pem
+*.p12
+*.pfx
+*.env
+*.secret
+*credentials*
+*private*
+secrets/*
+!secrets/README.md
+evidence/runtime/
