@@ -1,0 +1,51 @@
+marcodev10@cloudshell:~ (sa-saopaulo-1)$ bash ~/TPS-OCI-NS1-FINAL-PRETERMINATION-GATE-v1.0.0.sh
+=== INSTANCE ===
+{
+  "state": "STOPPED",
+  "shape": "VM.Standard.A2.Flex"
+}
+=== BOOT ATTACHMENT ===
+{
+  "id": "ocid1.instance.oc1.sa-saopaulo-1.antxeljrhob2fbacwpj4ce5xpca2zcgqmpxvg5ozgmo66wpfyaro7oqp5req",
+  "state": "ATTACHED",
+  "boot": "ocid1.bootvolume.oc1.sa-saopaulo-1.abtxeljryuiudzv4ji2ojiwobprhs4pohthqpuixa6ff754u2z4unm5gkppq",
+  "updated": "2026-09-03T10:14:28.678000+00:00"
+}
+=== BOOT ===
+{
+  "state": "AVAILABLE",
+  "size": 99,
+  "free": "true"
+}
+=== RESERVED IP ===
+{
+  "ip": "147.15.108.150",
+  "lifetime": "RESERVED",
+  "state": "AVAILABLE",
+  "assigned": null
+}
+=== A1 QUOTA ===
+{
+  "used": 0,
+  "available": 2
+}
+{
+  "used": 0,
+  "available": 12
+}
+=== A1 CAPACITY 2 OCPU / 12 GB ===
+[
+  {
+    "availability-status": "OUT_OF_HOST_CAPACITY",
+    "available-count": null,
+    "fault-domain": null,
+    "instance-shape": "VM.Standard.A1.Flex",
+    "instance-shape-config": {
+      "baseline-ocpu-utilization": null,
+      "memory-in-gbs": 12.0,
+      "nvmes": 0,
+      "ocpus": 2.0
+    }
+  }
+]
+RESULT=READ_ONLY_STATE_PLUS_CAPACITY_REPORT_COMPLETE
