@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+REGION=sa-saopaulo-1
+AD='PjZm:SA-SAOPAULO-1-AD-1'
+TENANCY='ocid1.tenancy.oc1..aaaaaaaa6tfzkm6woefrr5ynftu5cdlz4kslylpiy3ywvg2jiubywu5gct4a'
+OLD='ocid1.instance.oc1.sa-saopaulo-1.antxeljrhob2fbacwpj4ce5xpca2zcgqmpxvg5ozgmo66wpfyaro7oqp5req'
+BOOT='ocid1.bootvolume.oc1.sa-saopaulo-1.abtxeljryuiudzv4ji2ojiwobprhs4pohthqpuixa6ff754u2z4unm5gkppq'
+RIP='ocid1.publicip.oc1.sa-saopaulo-1.amaaaaaahob2fbaa7uxqmxbrpoicdurfyj27nuwtmlwxbaoxecmbha32thpq'
+echo '=== INSTANCE ==='
+oci compute instance get --instance-id "$OLD" --region "$REGION" --output json | jq '.data|{state:.["lifecycle-state"],shape}'
+echo '=== BOOT ATTACHMENT ==='
+oci compute boot-volume-attachment get --boot-volume-attachment-id "$OLD" --region "$REGION" --output json | jq '.data|{id,state:.["lifecycle-state"],boot:.["boot-volume-id"],updated:.["time-updated"]}'
+echo '=== BOOT ==='
+oci bv boot-volume get --boot-volume-id "$BOOT" --region "$REGION" --output json | jq '.data|{state:.["lifecycle-state"],size:.["size-in-gbs"],free:.["system-tags"]["orcl-cloud"]["free-tier-retained"]}'
+echo '=== RESERVED IP ==='
+oci network public-ip get --public-ip-id "$RIP" --region "$REGION" --output json | jq '.data|{ip:.["ip-address"],lifetime,state:.["lifecycle-state"],assigned:.["assigned-entity-id"]}'
+echo '=== A1 QUOTA ==='
+oci limits resource-availability get --service-name compute --limit-name standard-a1-core-count --availability-domain "$AD" --compartment-id "$TENANCY" --region "$REGION" --output json | jq '.data|{used,available}'
+oci limits resource-availability get --service-name compute --limit-name standard-a1-memory-count --availability-domain "$AD" --compartment-id "$TENANCY" --region "$REGION" --output json | jq '.data|{used,available}'
+echo '=== A1 CAPACITY 2 OCPU / 12 GB ==='
+CAP='[{"instanceShape":"VM.Standard.A1.Flex","instanceShapeConfig":{"ocpus":2,"memoryInGBs":12}}]'
+oci compute compute-capacity-report create --availability-domain "$AD" --compartment-id "$TENANCY" --shape-availabilities "$CAP" --region "$REGION" --output json | jq '.data["shape-availabilities"]'
+echo 'RESULT=READ_ONLY_STATE_PLUS_CAPACITY_REPORT_COMPLETE'
