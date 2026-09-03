@@ -22,7 +22,7 @@ write_media(){
   [[ -f $root/index.html ]] || printf '<!doctype html><meta charset="utf-8"><title>StudioSat</title><h1>StudioSat</h1>\n' > "$root/index.html"
   cat > "/etc/nginx/tps-canonical/conf.d/30-${safe}-https.conf" <<EOF
 server {
- listen 443 ssl; server_name ${h} www.${h}; server_tokens off;
+ listen 443 ssl; server_name ${h}; server_tokens off;
  ssl_certificate /etc/letsencrypt/live/${h}/fullchain.pem;
  ssl_certificate_key /etc/letsencrypt/live/${h}/privkey.pem;
  include /etc/nginx/snippets/tps-ssl-params.conf;

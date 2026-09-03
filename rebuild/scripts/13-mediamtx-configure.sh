@@ -14,29 +14,35 @@ python3 - "$PUBLISH_USER" "$PUBLISH_PASS" "$PUBLIC_IPV4" "$STATIONS" "${DERIVED_
 import json,sys
 user,pw,pub,stations,derived,srt=sys.argv[1:]
 paths=(stations+' '+derived).split()
+expr='~^('+'|'.join(paths)+')$'
 q=lambda s: json.dumps(s)
 print('logLevel: info')
 print('logDestinations: [stdout]')
 print('authMethod: internal')
 print('authInternalUsers:')
+# Remote authenticated publisher.
 print(f'  - user: {q(user)}')
 print(f'    pass: {q(pw)}')
 print('    ips: []')
 print('    permissions:')
 print('      - action: publish')
-print('        path: "~^('+'|'.join(paths)+')$"')
+print(f'        path: {q(expr)}')
+# Local playout publishers, no network exposure beyond loopback identity.
+print('  - user: any')
+print('    pass:')
+print('    ips: ["127.0.0.1", "::1"]')
+print('    permissions:')
+print('      - action: publish')
+print(f'        path: {q(expr)}')
+print('      - action: api')
+print('      - action: metrics')
+# Public playback/read only.
 print('  - user: any')
 print('    pass:')
 print('    ips: []')
 print('    permissions:')
 print('      - action: read')
-print('        path: "~^('+'|'.join(paths)+')$"')
-print('  - user: any')
-print('    pass:')
-print('    ips: ["127.0.0.1", "::1"]')
-print('    permissions:')
-print('      - action: api')
-print('      - action: metrics')
+print(f'        path: {q(expr)}')
 print('api: true')
 print('apiAddress: 127.0.0.1:9997')
 print('metrics: true')
@@ -63,8 +69,7 @@ if srt=='yes': print('srtAddress: :8890')
 print('pathDefaults:')
 print('  source: publisher')
 print('paths:')
-for p in paths:
-    print(f'  {p}: {{}}')
+for p in paths: print(f'  {p}: {{}}')
 PY
 chown root:tpsmedia /etc/tpsmedia/mediamtx/mediamtx.yml; chmod 0640 /etc/tpsmedia/mediamtx/mediamtx.yml
 systemctl stop tps-mediamtx.service 2>/dev/null || true
