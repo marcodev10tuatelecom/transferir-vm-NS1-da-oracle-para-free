@@ -1,0 +1,17 @@
+name: TPS Rebuild CI
+on:
+  push:
+    paths: ['rebuild/**']
+  pull_request:
+    paths: ['rebuild/**']
+jobs:
+  shell:
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install ShellCheck
+        run: sudo apt-get update && sudo apt-get install -y shellcheck
+      - name: Bash syntax
+        run: find rebuild/scripts -type f -name '*.sh' -print0 | xargs -0 -n1 bash -n
+      - name: ShellCheck
+        run: find rebuild/scripts -type f -name '*.sh' -print0 | xargs -0 shellcheck -x -e SC1090,SC1091
