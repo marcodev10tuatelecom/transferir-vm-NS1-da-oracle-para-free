@@ -1,0 +1,22 @@
+[Unit]
+Description=TPS Radio Playout %i 24x7
+After=network-online.target tps-mediamtx.service
+Requires=tps-mediamtx.service
+
+[Service]
+Type=simple
+User=tps-playout
+Group=tps-playout
+ExecStart=/usr/local/sbin/tps-radio-playout %i
+Restart=always
+RestartSec=2
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=true
+RuntimeDirectory=tps-radio-playout-%i
+RuntimeDirectoryMode=0750
+ReadWritePaths=/run/tps-radio-playout-%i
+
+[Install]
+WantedBy=multi-user.target

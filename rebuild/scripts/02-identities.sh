@@ -11,15 +11,10 @@ for u in tpsmedia tps-playout adminfra; do
   fi
 done
 usermod -a -G studiosatops tpsmedia
+usermod -a -G studiosatops tps-playout
 install -d -o tpsmedia -g tpsmedia -m 0750 /var/lib/tpsmedia/mediamtx
 install -d -o tps-playout -g tps-playout -m 0750 /var/lib/tps-playout /run/tps-playout
 section 'HUMAN ADMIN CHECK'
-if id marco >/dev/null 2>&1; then
-  getent group sudo | grep -Eq '(^|,)marco(,|$)' || log 'WARN=MARCO_NOT_IN_SUDO'
-else
-  log 'WARN=MARCO_USER_NOT_CREATED_AUTOMATICALLY'
-  log 'ACTION=Create marco with approved SSH public key before SSH hardening.'
-fi
-section 'SERVICE ACCOUNTS'
+if id marco >/dev/null 2>&1; then getent group sudo | grep -Eq '(^|,)marco(,|$)' || log 'WARN=MARCO_NOT_IN_SUDO'; else log 'WARN=MARCO_USER_NOT_CREATED_AUTOMATICALLY'; fi
 getent passwd tpsmedia tps-playout adminfra
 printf 'IDENTITIES=PASS\n'
